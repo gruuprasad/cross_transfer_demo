@@ -2,37 +2,54 @@ from isaacsim.core.api.objects import DynamicCuboid
 from isaacsim.core.api.tasks import BaseTask
 
 import numpy as np
+from collections import deque
+
 
 class BoxSupplierTask(BaseTask):
     """
         This class creates boxes and drops it on the conveyor belt.
         box creation interval is controlled.
     """
-    def __init__(self, name="box_delivery_task"):  
-        print("BoxSupplierTask called")
+    def __init__(self, name="box_supplier_task"):  
         super().__init__(name=name)  
-        self._boxes = {}  
+        self._boxes_goal = 8
+        self._box_queue = deque()
         self._box_count = 0
-        self._starting_pos = [-2.0, 0.0, 1.0]
+        self._starting_pos = [-2.0, 0.0, 0.9]
+        self.mid_way = [0.75, 0.0, 0.87]
 
-    def set_up_scene(self, scene):  
+    def set_up_scene(self, scene):
         super().set_up_scene(scene)
-        print("setup_scene called")
-        # Spawn box at the conveyor start location  
-        box_name = f"box{self._box_count + 1}"
-        box_prim = scene.add(DynamicCuboid(prim_path=f"/World/boxes/{box_name}",
-                                      name=box_name,
-                                      position=np.array(self._starting_pos),
-                                      scale=np.array([0.2, 0.2, 0.2]),
-                                      color=np.array([0, 1.0, 0])))
-        if box_prim:
-            self._boxes[box_name] = box_prim
-            self._box_count += 1
+        self.spawn_box()
 
-    def get_observations():
-        return None
+    def get_observations(self):
+        # it depends on the logic and usecase. For now, lets say
+        # something is interested in the work progress..
+        observations = {
+            "box_count": self._box_count
+        }
+        return observations
+
+    def spawn_box(self):
+        box_name = f"box{self._box_count + 1}"
+        box_prim = self._scene.add(DynamicCuboid(prim_path=f"/World/boxes/{box_name}",
+                                                 name=box_name,
+                                                 position=np.array(self._starting_pos),
+                                                 scale=np.array([0.2, 0.2, 0.2]),
+                                                 color=np.array([0, 1.0, 0])))
+        if box_prim:
+            self._box_queue.append(box_prim)
+            self._box_count += 1
 
     def pre_step(self, step_index, simulation_time):
         """called before stepping the physics simulation.
         """
-        pass
+        if self._box_count >= self._boxes_goal:
+            return
+
+        if self._box_queue:
+            box_pos, _ = self._box_queue[0].get_world_pose()
+
+            if box_pos[0] >= self.mid_way[0]:
+                self.spawn_box()
+                self._box_queue.popleft()
