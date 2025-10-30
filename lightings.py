@@ -14,6 +14,7 @@ lights = [
         "type": "DistantLight",
         "position": (0, 0, 5),
         "attributes": {"intensity": 5000.0, "color": (1.0, 1.0, 1.0), "angle": 0.53},
+        "look_at": (0, 0, 0),
     },
     {
         "name": "RectLight",
