@@ -5,21 +5,24 @@ from lightings import setup_lighting
 from sensors import setup_contact_sensor
 from tracks_controller import ConveyorTracksController
 
+import carb
+
 package_base_path = Path(__file__).parent
 asset_root_path = str(package_base_path / "assets")
 
 class ConveyorRoom:
     def __init__(self, world):
-        print("creating the room...")
+        carb.log_info("creating the room...")
         self._world = world
-        self._box_dropoff_point = [2.5, 0.0, 1.0]
+        self._box_dropoff_point = [-2.0, 0.0, 1.0]
+        self._box_scale = [0.2, 0.2, 0.2]
         self._contact_sensor = None
+        self._initialized = False
 
         self.setup_room()
-        self.simulation_ready()
 
     def setup_room(self):
-        print("setup_room():")
+        carb.log_info("setup_room():")
 
         setup_lighting()
 
@@ -31,11 +34,12 @@ class ConveyorRoom:
 
         self._contact_sensor = setup_contact_sensor()
 
-        print("setup_scene():exiting")
-
-    def simulation_ready(self):
-        self._world.reset()
-        self._world.play()
+        carb.log_info("setup_scene():exiting")
 
     def update(self):
+        if not self._initialized:
+            # Things to set before first tick
+            self.tracks_controller.set_all_surface_velocities([1.0, 0.0, 0.0])
+            self._initialized = True
+
         self._world.step(render=True)

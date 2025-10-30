@@ -1,11 +1,8 @@
 import omni
 import omni.usd
-import omni.graph.core as og
-from pxr import Gf
+from pxr import Gf, PhysxSchema
 
 import carb
-
-from pxr import Sdf
 
 class ConveyorTracksController:
     """
@@ -17,7 +14,8 @@ class ConveyorTracksController:
     def __init__(self, prefix_path):
         self._stage = omni.usd.get_context().get_stage()
         self._tracks = []
-        self._graphs = []
+        self._graphs = {} # key:track_path value:graph_prim
+        self._conveyor_prims = {}
 
         parent_prim = self._stage.GetPrimAtPath(prefix_path)
         if not parent_prim.IsValid():
@@ -25,13 +23,25 @@ class ConveyorTracksController:
             return
 
         self._tracks = list(parent_prim.GetChildren())
-        self._cross_tracks = set()
 
-        carb.log_info(f"Found {len(self._tracks)} tracks!")
+        print(f"Found {len(self._tracks)} tracks!")
 
-        self.create_graphs_for_tracks()
+        for track in self._tracks:
+            rigid_prim = self._find_rigid_prim_for_conveyor_belt_node(track)
+            if rigid_prim is None:
+                print(f"There is no roller or sorter body for track {track_path}")
+                continue
 
-    def create_action_graph(self, graph_name, conveyor_rigid_prim):
+            track_path = track.GetPath().pathString
+            self._conveyor_prims[track_path] = rigid_prim
+
+        # FIXME: Issue: omnigraph has read_speed which is setting the
+        # speed value to 0 on each tick. I need to disable that input inorder
+        # for driving through omnigraph to work. ATM, driving the belt directly
+        # using surface velocity API.
+        #self.create_graphs_for_tracks()
+
+    def _create_action_graph(self, graph_name, conveyor_rigid_prim):
         carb.log_info(f"create_action_graph=({conveyor_rigid_prim})")
         result, graph_prim = omni.kit.commands.execute(
             "CreateConveyorBelt",
@@ -44,9 +54,9 @@ class ConveyorTracksController:
 
         try:
             dir_attr = graph_prim.GetAttribute("inputs:direction")
-            dir_attr.Set(Gf.Vec3f(*[1.0, 0.0, 0.0]))
+            dir_attr.Set(Gf.Vec3f(*[1.0, 0.0, 0.0])) # move along +x axis
             attr = graph_prim.GetAttribute("inputs:velocity")
-            attr.Set(1.0)
+            attr.Set(1.0) # keep the conveyor belt at rest.
         except Exception as e:
             carb.log_error(f"Failed to set node attributes:{e}")
             return None
@@ -69,30 +79,110 @@ class ConveyorTracksController:
                 carb.log_info(f"Replacing existing ActionGraph under {track_path}")
                 self._stage.RemovePrim(graph_prim_path)
 
-            conveyor_rigid_prim = self.find_rigid_prim_for_conveyor_belt_node(track)
+            conveyor_rigid_prim = self._find_rigid_prim_for_conveyor_belt_node(track)
             if conveyor_rigid_prim is None:
                 carb.log_warn(f"There is no roller or sorter material for track {track_path}")
                 continue
 
             # Create the ActionGraph prim
-            graph_prim = self.create_action_graph(graph_name, conveyor_rigid_prim)
+            graph_prim = self._create_action_graph(graph_name, conveyor_rigid_prim)
+            if graph_prim:
+                self._graphs[track_path] = graph_prim
+                carb.log_info(f"Created ActionGraph for {track_path}.")
 
-            self._graphs.append(graph_prim)
-            carb.log_info(f"Created ActionGraph for {track_path}.")
-
-    def find_rigid_prim_for_conveyor_belt_node(self, track_prim):
+    def _find_rigid_prim_for_conveyor_belt_node(self, track_prim):
         """Return the target prim path that should be driven by the conveyor node."""
         for child in track_prim.GetChildren():
             name = child.GetName()
             if name == "Rollers":
+                print(f"conveyor_prim path - {child.GetPath().pathString}")
                 return child
             if name == "Sorter":
                 conveyor_prim = child.GetChild("Sorter_physics")
                 if conveyor_prim.IsValid():
-                    self._cross_tracks.add(track_prim)
+                    print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
                     return conveyor_prim
         return None
 
+    def set_all_velocities(self, value):
+        """Set conveyor belt velocity for all tracks that have action graphs."""
+        for track_path, graph_prim in self._graphs.items():
+            if graph_prim is None or not graph_prim.IsValid():
+                carb.log_warn(f"[set_all_velocities] Invalid graph prim for {track_path}")
+                continue
+            try:
+                vel_attr = graph_prim.GetAttribute("inputs:velocity")
+                if vel_attr.IsValid():
+                    vel_attr.Set(value)
+                    carb.log_info(f"Velocity set to {value} for {track_path}")
+                else:
+                    carb.log_warn(f"No 'inputs:velocity' attribute on {graph_prim.GetPath()}")
+            except Exception as e:
+                carb.log_error(f"Failed to set velocity for {track_path}: {e}")
+
+    
+
+    def set_track_speed(self, track_path: str, speed: float):
+        graph_prim = self._graphs.get(track_path)
+        if not graph_prim:
+            carb.log_warn(f"No graph registered for {track_path}")
+            return False
+
+        vel_attr = graph_prim.GetAttribute("inputs:velocity")
+        if not vel_attr.IsValid():
+            carb.log_warn(f"No velocity input on {track_path}")
+            return False
+
+        vel_attr.Set(speed)
+        carb.log_info(f"[{track_path}] speed set to {speed}")
+        return True
+
+    def set_all_surface_velocities(self, vel):
+        print("set_all_surface_velocities called")
+        for conveyor_prim in self._conveyor_prims.values():
+            self.set_surface_velocity(conveyor_prim, vel)
+
+    def set_surface_velocity(self, conveyor_prim, vel):
+        print("set_surface_velocity called")
+        surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)
+        if surface_velocity_api:
+        # Get current velocity for debugging
+            current_velocity = surface_velocity_api.GetSurfaceVelocityAttr().Get()
+            print(f"current_velocity = {current_velocity}")
+            # NOTE: taken from conveyor node implementation in isaacsim repo.
+            # quoting the exact reason: "Cycle the enabled attr to
+            #hardwire it to work on first sim" without this belt doesnt give movement.
+            surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(False);
+            surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(True);
+            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*vel))
+            print(f"velocity set to {vel}")
+        else:
+            print("Prim does not have PhysxSurfaceVelocityAPI applied.")
+
+    def set_track_direction(self, track_path: str, direction: tuple[float, float, float]):
+        graph_prim = self._graphs.get(track_path)
+        if not graph_prim:
+            carb.log_warn(f"No graph registered for {track_path}")
+            return False
+
+        dir_attr = graph_prim.GetAttribute("inputs:direction")
+        if not dir_attr.IsValid():
+            carb.log_warn(f"No direction input on {track_path}")
+            return False
+
+        dir_attr.Set(Gf.Vec3f(*direction))
+        carb.log_info(f"[{track_path}] direction set to {direction}")
+        return True
 
     def get_tracks(self):
         return self._tracks
+
+    def print_all_surface_velocities(self):
+        print("get_all_surface_velocities called")
+        for conveyor_prim in self._conveyor_prims.values():
+            surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)
+            if surface_velocity_api:
+                current_velocity = surface_velocity_api.GetSurfaceVelocityAttr().Get()
+                print(f"current_velocity = {current_velocity}")
+
+

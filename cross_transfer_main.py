@@ -10,12 +10,21 @@ enable_extension("isaacsim.asset.gen.conveyor")
 import sys
 from isaacsim.core.api import World
 from room_setup import ConveyorRoom
+from box_supplier_task import BoxSupplierTask
 
 world = World(stage_units_in_meters=1.0)
 world.scene.add_default_ground_plane()
 
 # sets the scene and make it simulation ready
 conveyor_room = ConveyorRoom(world)
+
+# add simple dynamic behavior.
+box_supply = BoxSupplierTask() 
+world.add_task(box_supply)
+
+# no looking back after this point!!!
+world.reset()
+world.play()
 
 step_count = 0
 while simulation_app.is_running():
