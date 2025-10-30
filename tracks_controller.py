@@ -1,5 +1,9 @@
+import omni
 import omni.usd
 import omni.graph.core as og
+from pxr import Gf
+
+import carb
 
 from pxr import Sdf
 
@@ -17,15 +21,38 @@ class ConveyorTracksController:
 
         parent_prim = self._stage.GetPrimAtPath(prefix_path)
         if not parent_prim.IsValid():
-            print(f"No prim found at '{prefix_path}' — tracks not loaded yet.")
+            carb.log_info(f"[ConveyorTracksController]:No prim found at '{prefix_path}' — tracks not loaded yet.")
             return
 
         self._tracks = list(parent_prim.GetChildren())
         self._cross_tracks = set()
 
-        print(f"Found {len(self._tracks)} tracks!")
+        carb.log_info(f"Found {len(self._tracks)} tracks!")
 
         self.create_graphs_for_tracks()
+
+    def create_action_graph(self, graph_name, conveyor_rigid_prim):
+        carb.log_info(f"create_action_graph=({conveyor_rigid_prim})")
+        result, graph_prim = omni.kit.commands.execute(
+            "CreateConveyorBelt",
+            prim_name=graph_name,
+            conveyor_prim=conveyor_rigid_prim
+        )
+        if graph_prim is None:
+            carb.log_error(f"Failed to create graph {graph_name}")
+            return None
+
+        try:
+            dir_attr = graph_prim.GetAttribute("inputs:direction")
+            dir_attr.Set(Gf.Vec3f(*[1.0, 0.0, 0.0]))
+            attr = graph_prim.GetAttribute("inputs:velocity")
+            attr.Set(1.0)
+        except Exception as e:
+            carb.log_error(f"Failed to set node attributes:{e}")
+            return None
+        carb.log_info(f"create_action_graph-{graph_name}: Success")
+        return graph_prim
+
 
     def create_graphs_for_tracks(self):
         """
@@ -34,79 +61,36 @@ class ConveyorTracksController:
         """
         for track in self._tracks:
             track_path = track.GetPath().pathString
-            graph_path = f"{track_path}/ConveyorTrackGraph"
+            graph_prim_path = f"{track_path}/ConveyorTrackGraph"
+            graph_name = "ConveyorTrackGraph"
 
             # Remove any existing graph to avoid duplicates
-            if self._stage.GetPrimAtPath(graph_path).IsValid():
-                print(f"Replacing existing ActionGraph under {track_path}")
-                self._stage.RemovePrim(graph_path)
+            if self._stage.GetPrimAtPath(graph_prim_path).IsValid():
+                carb.log_info(f"Replacing existing ActionGraph under {track_path}")
+                self._stage.RemovePrim(graph_prim_path)
 
-            roller_prim_path = self.find_roller_prim_for_conveyor_belt_node(track)
-            if roller_prim_path is None:
-                print(f"There is no roller or sorter material for track {track_path}")
+            conveyor_rigid_prim = self.find_rigid_prim_for_conveyor_belt_node(track)
+            if conveyor_rigid_prim is None:
+                carb.log_warn(f"There is no roller or sorter material for track {track_path}")
                 continue
 
             # Create the ActionGraph prim
-            print(f"graph_path ={graph_path}")
-            print("=== DIAGNOSTIC for this track ===")
-            print("track.GetPath().pathString repr:", repr(track_path))
-            print("track.GetPath().pathString len:", len(track_path))
-            print("graph_path repr:", repr(graph_path))
-            print("graph_path endswith '/':", graph_path.endswith("/"))
+            graph_prim = self.create_action_graph(graph_name, conveyor_rigid_prim)
 
-            # show the code points of the last few characters to reveal hidden chars
-            print("last chars (ord):", [(c, ord(c)) for c in graph_path[-6:]])
+            self._graphs.append(graph_prim)
+            carb.log_info(f"Created ActionGraph for {track_path}.")
 
-            # USD validator
-            try:
-                is_valid = Sdf.Path.IsValidPathString(graph_path)
-                print("Sdf.Path.IsValidPathString:", is_valid)
-            except Exception as e:
-                print("Sdf.Path.IsValidPathString raised:", e)
-
-            og.Controller.edit(
-                {
-                    "graph_path": graph_path,
-                    "evaluator_name": "execution",
-                    "pipeline_stage": og.GraphPipelineStage.GRAPH_PIPELINE_STAGE_ONDEMAND,
-                }
-            )
-
-            print("graph creation SUCCESS")
-
-            # Add OnTick node
-            tick_node = og.Controller.create_node(graph_path, "omni.graph.action.OnTick")
-            conveyor_node = og.Controller.create_node(graph_path, "isaacsim.asset.gen.conveyor.IsaacConveyor")
-            direction = og.Controller.create_node(graph_path, "omni.graph.nodes.ConstantVector3f")
-            speed = og.Controller.create_node(graph_path, "omni.graph.nodes.ConstantFloat")
-
-            # --- Configure constants ---
-            print("configuring constants for nodes")
-            og.Controller.set(og.Controller.attribute(direction, "inputs:value"), [1.0, 0.0, 0.0])
-            og.Controller.set(og.Controller.attribute(speed, "inputs:value"), 0.0)
-            og.Controller.set(og.Controller.attribute(conveyor_node, "inputs:conveyorPrim"), roller_prim_path)
-
-             # --- Connect ---
-            print("connecting nodes")
-            og.Controller.connect(og.Controller.attribute(tick_node, "outputs:tick"),
-                                  og.Controller.attribute(conveyor_node, "inputs:execIn"))
-            og.Controller.connect(og.Controller.attribute(direction, "outputs:value"),
-                                  og.Controller.attribute(conveyor_node, "inputs:direction"))
-            og.Controller.connect(og.Controller.attribute(speed, "outputs:value"),
-                                  og.Controller.attribute(conveyor_node, "inputs:speed"))
-
-            print(f"Created ActionGraph for {track_path}.")
-            self._graphs.append(graph_path)
-
-    def find_roller_prim_for_conveyor_belt_node(self, track_prim):
+    def find_rigid_prim_for_conveyor_belt_node(self, track_prim):
         """Return the target prim path that should be driven by the conveyor node."""
         for child in track_prim.GetChildren():
-            name = child.GetName().lower()
-            if "rollers" in name:
-                return child.GetPath().pathString
-            if "sorter" in name:
-                self._cross_tracks.add(track_prim)
-                return f"{child.GetPath().pathString}/Sorter_physics"
+            name = child.GetName()
+            if name == "Rollers":
+                return child
+            if name == "Sorter":
+                conveyor_prim = child.GetChild("Sorter_physics")
+                if conveyor_prim.IsValid():
+                    self._cross_tracks.add(track_prim)
+                    return conveyor_prim
         return None
 
 
