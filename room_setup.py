@@ -2,7 +2,6 @@ from isaacsim.core.utils.stage import add_reference_to_stage
 from pathlib import Path
 
 from lightings import setup_lighting
-from sensors import setup_contact_sensor
 from tracks_controller import ConveyorTracksController
 
 import carb
@@ -14,10 +13,8 @@ class ConveyorRoom:
     def __init__(self, world):
         carb.log_info("creating the room...")
         self._world = world
-        self._box_dropoff_point = [-2.0, 0.0, 1.0]
-        self._box_scale = [0.2, 0.2, 0.2]
-        self._contact_sensor = None
         self._initialized = False
+        self._tracks = None
 
         self.setup_room()
 
@@ -30,9 +27,14 @@ class ConveyorRoom:
         # USD contains prebuilt scene (using conveyor builder plugin) containing conveyor track layout.
         track_asset = str(Path(asset_root_path) / "conveyor_track_setup.usd")
         add_reference_to_stage(usd_path=track_asset, prim_path="/World/Tracks")
-        self.tracks_controller = ConveyorTracksController(prefix_path="/World/Tracks")
+        
+        parent_prim = self._stage.GetPrimAtPath("/World/Tracks")
+        if not parent_prim.IsValid():
+            carb.log_info(f"[ConveyorTracksController]:No prim found at '{prefix_path}' — tracks not loaded yet.")
+            return
+        self._tracks = list(parent_prim.GetChildren())
 
-        self._contact_sensor = setup_contact_sensor()
+        self.tracks_controller = ConveyorTracksController(self._tracks)
 
         carb.log_info("setup_scene():exiting")
 

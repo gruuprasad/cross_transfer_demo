@@ -18,10 +18,6 @@ world.scene.add_default_ground_plane()
 # sets the scene and make it simulation ready
 conveyor_room = ConveyorRoom(world)
 
-# add simple dynamic behavior.
-box_supply = BoxSupplierTask() 
-world.add_task(box_supply)
-
 # no looking back after this point!!!
 world.reset()
 world.play()

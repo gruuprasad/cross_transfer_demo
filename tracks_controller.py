@@ -11,20 +11,12 @@ class ConveyorTracksController:
     2. tracks that only move in one direction during operation are driven by omnigraph nodes (because of the simplicity of the existing omnigraph nodes).
     nothing stops one from choosing either one of the methods for all tracks!
     """
-    def __init__(self, prefix_path):
+    def __init__(self, tracks):
         self._stage = omni.usd.get_context().get_stage()
-        self._tracks = []
+        self._tracks = tracks
         self._graphs = {} # key:track_path value:graph_prim
-        self._conveyor_prims = {}
-
-        parent_prim = self._stage.GetPrimAtPath(prefix_path)
-        if not parent_prim.IsValid():
-            carb.log_info(f"[ConveyorTracksController]:No prim found at '{prefix_path}' — tracks not loaded yet.")
-            return
-
-        self._tracks = list(parent_prim.GetChildren())
-
-        print(f"Found {len(self._tracks)} tracks!")
+        self._conveyor_prims = {} # key: track_path value:conveyor_prim
+        self._cross_prim = None # hacky: temporary, remove this
 
         for track in self._tracks:
             rigid_prim = self._find_rigid_prim_for_conveyor_belt_node(track)
@@ -101,6 +93,7 @@ class ConveyorTracksController:
                 conveyor_prim = child.GetChild("Sorter_physics")
                 if conveyor_prim.IsValid():
                     print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
+                    self._cross_prim = conveyor_prim # Remove this!!!
                     return conveyor_prim
         return None
 
@@ -142,8 +135,21 @@ class ConveyorTracksController:
         for conveyor_prim in self._conveyor_prims.values():
             self.set_surface_velocity(conveyor_prim, vel)
 
-    def set_surface_velocity(self, conveyor_prim, vel):
-        print("set_surface_velocity called")
+    # for now only toggle between x and y axis.
+    # TODO: create General API covering more cases.
+    def change_surface_velocity_direction(self, conveyor_prim):
+        surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)
+        if surface_velocity_api:
+            vel = surface_velocity_api.GetSurfaceVelocityAttr().Get()
+            vel = [vel[1], vel[0], vel[2]]
+            surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(False);
+            surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(True);
+            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*vel))
+
+    def set_surface_velocity(self, conveyor_prim, vel, axis=0):
+        if not (0 <= axis <= 2):
+            raise ValueError("axis must be 0 (X), 1 (Y), or 2 (Z)")
+
         surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)
         if surface_velocity_api:
         # Get current velocity for debugging
@@ -152,9 +158,11 @@ class ConveyorTracksController:
             # NOTE: taken from conveyor node implementation in isaacsim repo.
             # quoting the exact reason: "Cycle the enabled attr to
             #hardwire it to work on first sim" without this belt doesnt give movement.
+            new_vel = [0.0, 0.0, 0.0]
+            new_vel[axis] = vel
             surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(False);
             surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(True);
-            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*vel))
+            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*new_vel))
             print(f"velocity set to {vel}")
         else:
             print("Prim does not have PhysxSurfaceVelocityAPI applied.")
