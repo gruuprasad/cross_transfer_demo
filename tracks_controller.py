@@ -12,20 +12,8 @@ class ConveyorTracksController:
     nothing stops one from choosing either one of the methods for all tracks!
     """
     def __init__(self, tracks):
-        self._stage = omni.usd.get_context().get_stage()
         self._tracks = tracks
         self._graphs = {} # key:track_path value:graph_prim
-        self._conveyor_prims = {} # key: track_path value:conveyor_prim
-        self._cross_prim = None # hacky: temporary, remove this
-
-        for track in self._tracks:
-            rigid_prim = self._find_rigid_prim_for_conveyor_belt_node(track)
-            if rigid_prim is None:
-                print(f"There is no roller or sorter body for track {track_path}")
-                continue
-
-            track_path = track.GetPath().pathString
-            self._conveyor_prims[track_path] = rigid_prim
 
         # FIXME: Issue: omnigraph has read_speed which is setting the
         # speed value to 0 on each tick. I need to disable that input inorder
@@ -33,12 +21,13 @@ class ConveyorTracksController:
         # using surface velocity API.
         #self.create_graphs_for_tracks()
 
-    def _create_action_graph(self, graph_name, conveyor_rigid_prim):
-        carb.log_info(f"create_action_graph=({conveyor_rigid_prim})")
+    def _create_action_graph(self, graph_name, track_path):
+        conveyor_prim, _ = self._tracks[track_path]
+        carb.log_info(f"create_action_graph=({conveyor_prim.GetName()})")
         result, graph_prim = omni.kit.commands.execute(
             "CreateConveyorBelt",
             prim_name=graph_name,
-            conveyor_prim=conveyor_rigid_prim
+            conveyor_prim=conveyor_prim
         )
         if graph_prim is None:
             carb.log_error(f"Failed to create graph {graph_name}")
@@ -48,54 +37,27 @@ class ConveyorTracksController:
             dir_attr = graph_prim.GetAttribute("inputs:direction")
             dir_attr.Set(Gf.Vec3f(*[1.0, 0.0, 0.0])) # move along +x axis
             attr = graph_prim.GetAttribute("inputs:velocity")
-            attr.Set(1.0) # keep the conveyor belt at rest.
+            attr.Set(1.0)
         except Exception as e:
             carb.log_error(f"Failed to set node attributes:{e}")
             return None
         carb.log_info(f"create_action_graph-{graph_name}: Success")
         return graph_prim
 
-
     def create_graphs_for_tracks(self):
         """
         create omnigraph for each track containing
         three nodes: onTick, conveyorBelt, velocity, direction.
         """
-        for track in self._tracks:
-            track_path = track.GetPath().pathString
+        for track_path in self._tracks.keys():
             graph_prim_path = f"{track_path}/ConveyorTrackGraph"
             graph_name = "ConveyorTrackGraph"
 
-            # Remove any existing graph to avoid duplicates
-            if self._stage.GetPrimAtPath(graph_prim_path).IsValid():
-                carb.log_info(f"Replacing existing ActionGraph under {track_path}")
-                self._stage.RemovePrim(graph_prim_path)
-
-            conveyor_rigid_prim = self._find_rigid_prim_for_conveyor_belt_node(track)
-            if conveyor_rigid_prim is None:
-                carb.log_warn(f"There is no roller or sorter material for track {track_path}")
-                continue
-
             # Create the ActionGraph prim
-            graph_prim = self._create_action_graph(graph_name, conveyor_rigid_prim)
+            graph_prim = self._create_action_graph(graph_name, track_path)
             if graph_prim:
                 self._graphs[track_path] = graph_prim
                 carb.log_info(f"Created ActionGraph for {track_path}.")
-
-    def _find_rigid_prim_for_conveyor_belt_node(self, track_prim):
-        """Return the target prim path that should be driven by the conveyor node."""
-        for child in track_prim.GetChildren():
-            name = child.GetName()
-            if name == "Rollers":
-                print(f"conveyor_prim path - {child.GetPath().pathString}")
-                return child
-            if name == "Sorter":
-                conveyor_prim = child.GetChild("Sorter_physics")
-                if conveyor_prim.IsValid():
-                    print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
-                    self.cross_prim = conveyor_prim # Remove this!!!
-                    return conveyor_prim
-        return None
 
     def set_all_velocities(self, value):
         """Set conveyor belt velocity for all tracks that have action graphs."""
@@ -132,7 +94,7 @@ class ConveyorTracksController:
 
     def set_all_surface_velocities(self, vel):
         print("set_all_surface_velocities called")
-        for conveyor_prim in self._conveyor_prims.values():
+        for conveyor_prim, _ in self._tracks.values():
             self.set_surface_velocity(conveyor_prim, vel)
 
     # for now only toggle between x and y axis.
