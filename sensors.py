@@ -7,14 +7,15 @@ parent_prim = "/World/TrackArea/sensor_base_01"
 sensor_name = "sensor1"
 
 def setup_contact_sensor():
-    try:
-        prim_path = parent_prim + "/" + sensor_name
-        sensor = ContactSensor(
-            prim_path=prim_path,
-            name=sensor_name,
-            frequency=60
-        )
-    except Exception as e:
-        print(f"setup_contact_sensor():failed"
-                "to create sensor at {prim_path} with error:{e}")
-    return sensor
+    # Define the sensor prim path
+    prim_path = f"{parent_prim}/{sensor_name}"
+    sensor = ContactSensor(
+        prim_path=prim_path,
+        name=sensor_name,
+        frequency=60
+    )
+
+    if sensor:
+        return sensor
+    print("failed to create sensor")
+    return None

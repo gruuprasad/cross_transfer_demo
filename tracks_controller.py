@@ -93,7 +93,7 @@ class ConveyorTracksController:
                 conveyor_prim = child.GetChild("Sorter_physics")
                 if conveyor_prim.IsValid():
                     print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
-                    self._cross_prim = conveyor_prim # Remove this!!!
+                    self.cross_prim = conveyor_prim # Remove this!!!
                     return conveyor_prim
         return None
 
@@ -160,9 +160,10 @@ class ConveyorTracksController:
             #hardwire it to work on first sim" without this belt doesnt give movement.
             new_vel = [0.0, 0.0, 0.0]
             new_vel[axis] = vel
+            vec = Gf.Vec3f(*new_vel)
             surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(False);
             surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(True);
-            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*new_vel))
+            surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(vec))
             print(f"velocity set to {vel}")
         else:
             print("Prim does not have PhysxSurfaceVelocityAPI applied.")

@@ -14,8 +14,8 @@ class BoxSortingTask(BaseTask):
         super().__init__(name=name)
         self._box_supply_task = BoxSupplierTask() 
         self._contact_sensor = None
-        self._cross_prim = room_prim._tracks_controller._cross_prim
-        self._controller = room_prim._tracks_controller
+        self._cross_prim = room_prim.tracks_controller.cross_prim
+        self._controller = room_prim.tracks_controller
         self._box_crossing = False
 
     def set_up_scene(self, scene):

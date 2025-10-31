@@ -1,5 +1,6 @@
 from isaacsim.core.utils.stage import add_reference_to_stage
 from pathlib import Path
+import omni.usd
 
 from lightings import setup_lighting
 from tracks_controller import ConveyorTracksController
@@ -28,20 +29,20 @@ class ConveyorRoom:
         track_asset = str(Path(asset_root_path) / "conveyor_track_setup.usd")
         add_reference_to_stage(usd_path=track_asset, prim_path="/World/Tracks")
         
-        parent_prim = self._stage.GetPrimAtPath("/World/Tracks")
+        stage = omni.usd.get_context().get_stage()
+        parent_prim = stage.GetPrimAtPath("/World/Tracks")
         if not parent_prim.IsValid():
             carb.log_info(f"[ConveyorTracksController]:No prim found at '{prefix_path}' — tracks not loaded yet.")
             return
         self._tracks = list(parent_prim.GetChildren())
 
         self.tracks_controller = ConveyorTracksController(self._tracks)
-
         carb.log_info("setup_scene():exiting")
 
     def update(self):
         if not self._initialized:
             # Things to set before first tick
-            self.tracks_controller.set_all_surface_velocities([1.0, 0.0, 0.0])
+            self.tracks_controller.set_all_surface_velocities(1.0)
             self._initialized = True
 
         self._world.step(render=True)
