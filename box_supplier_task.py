@@ -18,6 +18,7 @@ class BoxSupplierTask(BaseTask):
         self._boxes_goal = goal
         self._box_queue = deque()
         self._box_count = 0
+        self._box_crossed
         # some parameters needed for operatiosn, to be queiried from stage,
         # hardcoded for simplicity for now. 
         # Finding the area of placement etc needs identifying the surface region.
@@ -32,7 +33,8 @@ class BoxSupplierTask(BaseTask):
     def get_observations(self):
         # send the number of boxes produced so far.
         observations = {
-            "box_count": self._box_count,
+            "box_spawned": self._box_count,
+            "box_crossed": self._box_crossed,
             "leading_box": self._box_queue[0],
             "queu_length": len(self._box_queue)
         }
@@ -60,5 +62,6 @@ class BoxSupplierTask(BaseTask):
             box_pos, _ = self._box_queue[0].get_world_pose()
 
             if box_pos[0] >= self.mid_way[0]:
+                self._box_crossed += 1
                 self.spawn_box()
                 self._box_queue.popleft()

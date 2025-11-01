@@ -24,7 +24,8 @@ class TrackOperatorTask(BaseTask):
 
     def set_up_scene(self, scene):
         super().set_up_scene(scene)
-        self._contact_sensor = setup_contact_sensor()
+        self._contact_sensor_prim_path = "/World/sensor_base_01/Contact_Sensor"
+        self._contact_sensor = setup_contact_sensor(self._contact_sensor_prim_path)
 
     def get_observations(self):
         observations = {
