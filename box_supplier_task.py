@@ -32,7 +32,9 @@ class BoxSupplierTask(BaseTask):
     def get_observations(self):
         # send the number of boxes produced so far.
         observations = {
-            "box_count": self._box_count
+            "box_count": self._box_count,
+            "leading_box": self._box_queue[0],
+            "queu_length": len(self._box_queue)
         }
         return observations
 

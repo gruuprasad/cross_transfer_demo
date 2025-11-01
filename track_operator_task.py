@@ -7,7 +7,7 @@ from sensors import setup_contact_sensor
 from physics_actions import set_surface_velocity_direction
 
 class TrackState(Enum):
-    STRAIGHT = 0,
+    STRAIGHT = 0
     CROSS = 1
 
 class TrackOperatorTask(BaseTask):
@@ -27,14 +27,14 @@ class TrackOperatorTask(BaseTask):
         self._contact_sensor = setup_contact_sensor()
 
     def get_observations(self):
-        observations[
+        observations = {
             "track_state": self._track_state,
             "item_present": self._contact_sensor.get_current_frame()["in_contact"]    
-        ]
+        }
 
         return observations
 
-    def toggle_cross_switch():
+    def toggle_cross_switch(self):
         if self._cross_switch == True:
             self._cross_switch = False
         else:
@@ -45,13 +45,13 @@ class TrackOperatorTask(BaseTask):
         in_contact = self._contact_sensor.get_current_frame()["in_contact"]
         if in_contact and self._track_state == TrackState.CROSS:
             # wait for item to complete transfer
-            continue
+            return
 
         if in_contact and self._cross_switch:
             # set conveyor to move cross.
-            set_surface_velocity_direction([0, 1, 0])
+            set_surface_velocity_direction(self._cross_prim, [0, 1, 0])
             self._track_state = TrackState.CROSS
         elif not in_contact and self._track_state == TrackState.CROSS:
             # set conveyor to move stright.
-            set_surface_velocity_direction([1, 0, 0])
+            set_surface_velocity_direction(self._cross_prim, [1, 0, 0])
             self._track_state = TrackState.STRAIGHT
