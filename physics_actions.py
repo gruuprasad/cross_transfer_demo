@@ -1,14 +1,19 @@
 from pxr import Gf, PhysxSchema
 
 # this function is also redundant
-def rotate_surface_velocity_direction(conveyor_prim):
+def set_surface_velocity_direction(conveyor_prim, direction):
+    if all(axis == 0 for axis in direction):
+        print("at least one of the direction axis should be set")
+        return
+
     surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)
     if surface_velocity_api:
         vel = surface_velocity_api.GetSurfaceVelocityAttr().Get()
-        vel = [vel[1], vel[0], vel[2]]
+        new_vel = [v * d for  v, d in zip(vel, direction)]
+        # revisit this toggling action later to decide whether its needed.
         surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(False);
         surface_velocity_api.GetSurfaceVelocityEnabledAttr().Set(True);
-        surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*vel))
+        surface_velocity_api.GetSurfaceVelocityAttr().Set(Gf.Vec3f(*new_vel))
 
 def set_surface_velocity(conveyor_prim, vel, axis=0):
     surface_velocity_api = PhysxSchema.PhysxSurfaceVelocityAPI.Apply(conveyor_prim)

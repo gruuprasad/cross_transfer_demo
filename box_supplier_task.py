@@ -4,17 +4,24 @@ from isaacsim.core.api.tasks import BaseTask
 import numpy as np
 from collections import deque
 
-
 class BoxSupplierTask(BaseTask):
     """
         This class creates boxes and drops it on the conveyor belt.
-        box creation interval is controlled.
+        box creation interval is controlled within this class for now.
+        but ideally this is driven outside the Task. From what I understand,
+        that's the purpose of this class, where class is container for
+        environment asset and provides observation. Controller logic is put
+        outside.
     """
-    def __init__(self, name="box_supplier_task"):  
+    def __init__(self, name="box_supplier_task", goal=100):  
         super().__init__(name=name)  
-        self._boxes_goal = 8
+        self._boxes_goal = goal
         self._box_queue = deque()
         self._box_count = 0
+        # some parameters needed for operatiosn, to be queiried from stage,
+        # hardcoded for simplicity for now. 
+        # Finding the area of placement etc needs identifying the surface region.
+        # need to explore the availble options.
         self._starting_pos = [-2.0, 0.0, 0.9]
         self.mid_way = [0.75, 0.0, 0.87]
 
@@ -23,8 +30,7 @@ class BoxSupplierTask(BaseTask):
         self.spawn_box()
 
     def get_observations(self):
-        # it depends on the logic and usecase. For now, lets say
-        # something is interested in the work progress..
+        # send the number of boxes produced so far.
         observations = {
             "box_count": self._box_count
         }
@@ -42,7 +48,8 @@ class BoxSupplierTask(BaseTask):
             self._box_count += 1
 
     def pre_step(self, step_index, simulation_time):
-        """called before stepping the physics simulation.
+        """
+            called before stepping the physics simulation.
         """
         if self._box_count >= self._boxes_goal:
             return

@@ -8,14 +8,14 @@ class TrackType(Enum):
     CROSS = 1
 
 # helper methods to extract conveyor track related details.
-def collect_track_details_from_stage(track_group):
+def collect_track_details_from_stage(parent_prim_path):
     stage = omni.usd.get_context().get_stage()
     if stage is None:
         print("Invalid stage")
         return {}
-    parent_prim = stage.GetPrimAtPath(track_group)
+    parent_prim = stage.GetPrimAtPath(parent_prim_path)
     if not parent_prim.IsValid():
-        carb.log_info(f"[ConveyorTracksController]:No prim found at {track_group}")
+        carb.log_info(f"No prim found at {parent_prim_path}")
         return {}
 
     tracks = {}
@@ -25,10 +25,10 @@ def collect_track_details_from_stage(track_group):
             name = child.GetName()
             if name == "Rollers":
                 print(f"conveyor_prim path - {child.GetPath().pathString}")
-                tracks[prim.GetPath().pathString] = (child, TrackType.NORMAL)
+                tracks[prim.GetPath().pathString] = (TrackType.NORMAL, child)
             if name == "Sorter":
                 conveyor_prim = child.GetChild("Sorter_physics")
                 if conveyor_prim.IsValid():
                     print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
-                    tracks[prim.GetPath().pathString] = (conveyor_prim, TrackType.CROSS)
+                    tracks[prim.GetPath().pathString] = (TrackType.CROSS, conveyor_prim)
     return tracks

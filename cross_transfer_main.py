@@ -3,33 +3,62 @@ from isaacsim import SimulationApp
 simulation_app = SimulationApp({"headless": False})
 
 from isaacsim.core.utils.extensions import enable_extension
-
-# Enable Conveyor extension
 enable_extension("isaacsim.asset.gen.conveyor")
 
 import sys
 from isaacsim.core.api import World
-from room_setup import ConveyorRoom
-from box_sorting_task import BoxSortingTask
+from isaacsim.core.utils.stage import add_reference_to_stage
+from pathlib import Path
+
+from lightings import setup_lighting
+from conveyor_setup import collect_track_details_from_stage, TrackType
+from track_operator_task import TrackOperatorTask
+from box_supplier_task import BoxSupplierTask
+
+current_dir = Path(__file__).parent
+asset_root_path = str(current_dir / "assets")
 
 world = World(stage_units_in_meters=1.0)
 world.scene.add_default_ground_plane()
+setup_lighting()
 
-# sets the scene and make it simulation ready
-conveyor_room = ConveyorRoom(world)
+# get conveyor track details
+track_asset = str(Path(asset_root_path) / "conveyor_room.usd")
+add_reference_to_stage(usd_path=track_asset, prim_path="/World/")
+tracks = collect_track_details_from_stage("/World")
 
-box_sorter = BoxSortingTask(conveyor_room)
-world.add_task(box_sorter)
+# add task to produce boxes to be transferred
+supplier_task = BoxSupplierTask()
+world.add_task(supplier_task)
 
-# no looking back after this point!!!
+track_operator_names = []
+for index, (track_path, properties) in enumerate(tracks.items()):
+    # task that manages movement of box at a junction
+    if properties[0] == TrackType.CROSS:
+        task_name = f"track_operaotr_task_{index}" 
+        track_operator_task = TrackOperatorTask(properties[1], name=task_name)
+        world.add_task(track_operator_task)
+        track_operator_names.append(task_name)
+
 world.reset()
 world.play()
 
 step_count = 0
+switch_frequency = 3 # switches every (4-1) boxes
+
 while simulation_app.is_running():
 
+    if supplier_task.get_observation()["box_count"] % (switch_frequency + 1) == 0:
+        for name in track_operator_names:
+            if (task := world.get_task(name)) is not None:
+                switch = task.toggle_cross_switch()
+                if switch == True:
+                    print("belt is doing cross transfer for each item")
+                else:
+                    print("belt is sending the items straight down the line")
+
     # advance the  world
-    conveyor_room.update()
+    world.step(render=True)
     step_count += 1
 
 simulation_app.close()
