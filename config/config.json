@@ -1,9 +1,9 @@
 {
-	"track_01": {
-		"directions": [
-			1,
+	"/World/ConveyorTrack_AB_01": {
+		"direction": [
 			-1,
+			1,
 			0
 		]
-	},
+	}
 }

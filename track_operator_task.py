@@ -7,7 +7,7 @@ from sensors import setup_contact_sensor
 from physics_actions import set_surface_velocity_direction
 from math_utils import hadamard_product
 
-class TrackState(enum):
+class TrackState(Enum):
     STRAIGHT = 0
     CROSS = 1
 
@@ -43,6 +43,7 @@ class TrackOperatorTask(BaseTask):
 
     def pre_step(self, step_index, simulation_time):
         self._item_present = self._contact_sensor.get_current_frame()["in_contact"]
+        print(f"sensor in_contact={self._item_present}")
 
         if self._item_present and self._track_state == TrackState.CROSS:
             # wait for item to complete transfer
