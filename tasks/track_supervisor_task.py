@@ -11,9 +11,9 @@ class TrackSupervisorTask(BaseTask):
         self._initialised = False
         self._tracks = tracks
         self._track_tasks = []
-        self._initial_velocity = [0.5, 0.0, 0.0]
+        self._track_velocity = [0.8, 0.0, 0.0]
         self._last_switch_time = 0.0      # time (in seconds)
-        self._track_switch_interval = 5.0    # every 10 seconds
+        self._track_switch_interval = 5.0  # every 10 seconds TODO: read from config
 
         # create task that handles cross-transfers
         for index, (track_path, properties) in enumerate(self._tracks.items()):
@@ -36,7 +36,7 @@ class TrackSupervisorTask(BaseTask):
             for track_data in self._tracks.values():
                 direction = track_data["info"].direction
                 set_surface_velocity(track_data["info"].prim,
-                                 hadamard_product(self._initial_velocity, direction))
+                                 hadamard_product(self._track_velocity, direction))
                 print(direction)
             self._initialised = True
             return

@@ -1,9 +1,17 @@
 {
-	"/World/ConveyorTrack_AB_01": {
-		"direction": [
-			-1,
-			1,
-			0
-		]
+	"track_operator_task": {
+		"/World/ConveyorTrack_AB_01": {
+			"direction": [
+				-1,
+				1,
+				0
+			]
+		}
+	},
+	"box_supplier_task": {
+		"box_gap": 0.7
+	},
+	"track_supervisor_task": {
+		"switch_interval": 5.0
 	}
 }

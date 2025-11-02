@@ -13,12 +13,12 @@ class BoxSupplierTask(BaseTask):
         environment asset and provides observation. Controller logic is put
         outside.
     """
-    def __init__(self, name="box_supplier_task", goal=1000):  
+    def __init__(self, name="box_supplier_task", box_gap=0.8):  
         super().__init__(name=name)  
         self._running = False
-        self._boxes_goal = goal
         self._box_queue = deque()
         self._box_count = 0
+        self._box_gap = box_gap # TODO: read from config
         # some parameters needed for operatiosn, to be queiried from stage,
         # hardcoded for simplicity for now. 
         # Finding the area of placement etc needs identifying the surface region.
@@ -59,7 +59,7 @@ class BoxSupplierTask(BaseTask):
         if self._running:
             if self._box_queue:
                 box_pos, _ = self._box_queue[-1].get_world_pose()
-                if (abs(box_pos[0] - self._starting_pos[0])) >= 1.0:
+                if (abs(box_pos[0] - self._starting_pos[0])) >= self._box_gap:
                     self.spawn_box()
             else:
                 self.spawn_box()

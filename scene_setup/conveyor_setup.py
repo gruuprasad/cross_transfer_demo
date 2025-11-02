@@ -23,9 +23,12 @@ def merge_config_with_tracks(tracks, config_file="config.json"):
         return tracks
 
     # Merge config directions into existing track dict
+    if "track_operator_task" not in config_data:
+        return tracks
+    track_data = config_data["track_operator_task"]
     for name, track in tracks.items():
-        if name in config_data:
-            cfg = config_data[name]
+        if name in track_data:
+            cfg = track_data[name]
             print(f"cfg[direction] = {cfg}")
             if "direction" in cfg and isinstance(cfg["direction"], list):
                 track["info"].direction = cfg["direction"]
