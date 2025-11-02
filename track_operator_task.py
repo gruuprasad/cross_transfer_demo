@@ -5,27 +5,28 @@ from enum import Enum
 
 from sensors import setup_contact_sensor
 from physics_actions import set_surface_velocity_direction
+from math_utils import hadamard_product
 
-class TrackState(Enum):
+class TrackState(enum):
     STRAIGHT = 0
     CROSS = 1
 
 class TrackOperatorTask(BaseTask):
     """
-    This task performs either straight or cross transfer based on input. 
-    Internally uses the sensor reading to manage the track state.
+    this task performs either straight or cross transfer based on input. 
+    internally uses the sensor reading to manage the track state.
     """
-    def __init__(self, cross_prim, name="track_operator_task"):  
+    def __init__(self, track_info, name="track_operator_task"):  
         super().__init__(name=name)
         self._contact_sensor = None
-        self._cross_prim = cross_prim
+        self._track_info = track_info
         self._track_state = TrackState.STRAIGHT
         self._cross_switch = False
         self._item_present = False
 
     def set_up_scene(self, scene):
         super().set_up_scene(scene)
-        self._contact_sensor_prim_path = "/World/sensor_base_01/Contact_Sensor"
+        self._contact_sensor_prim_path = "/World/sensor_base_01/contact_sensor"
         self._contact_sensor = setup_contact_sensor(self._contact_sensor_prim_path)
 
     def get_observations(self):
@@ -50,11 +51,13 @@ class TrackOperatorTask(BaseTask):
 
         if self._item_present and self._cross_switch:
             # set conveyor to move across.
-            set_surface_velocity_direction(self._cross_prim, [0, 1, 0])
+            direction = hadamard_product(self._track_info.direction, [0, 1, 0])
+            set_surface_velocity_direction(self._track_info.prim, direction)
             print("[track_operator]:called set_surface_velocity_direction:cross")
             self._track_state = TrackState.CROSS
         elif not self._item_present and self._track_state == TrackState.CROSS:
             # set conveyor to move stright.
-            set_surface_velocity_direction(self._cross_prim, [-1, 0, 0])
+            direction = hadamard_product(self._track_info.direction, [1, 0, 0])
+            set_surface_velocity_direction(self._track_info.prim, direction)
             print("[track_operator]:called set_surface_velocity_direction:straight")
             self._track_state = TrackState.STRAIGHT

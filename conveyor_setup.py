@@ -9,6 +9,15 @@ class TrackType(Enum):
     NORMAL = 0
     CROSS = 1
 
+class TrackInfo:
+    def __init__(self, prim, direction=None):
+        self.prim = prim
+        self.direction = direction
+
+    def __repr__(self):
+        return f"TrackInfo(prim={self.prim}, direction={self.direction})"
+
+
 def merge_config_with_tracks(tracks, config_file="config.json"):
     config_path = Path(__file__).resolve().parent / "config" / config_file
 
@@ -28,9 +37,9 @@ def merge_config_with_tracks(tracks, config_file="config.json"):
     for name, track in tracks.items():
         if name in config_data:
             cfg = config_data[name]
-            if "directions" in cfg and isinstance(cfg["directions"], list):
-                track["directions"] = cfg["directions"]
-                print(f"[config] Merged directions for {name}: {cfg['directions']}")
+            if "direction" in cfg and isinstance(cfg["direction"], list):
+                track["track_prim"].direction = cfg["direction"]
+                print(f"[config] Merged directions for {name}: {cfg['direction']}")
             else:
                 print(f"[config] No valid directions for {name}")
         else:
@@ -56,11 +65,13 @@ def read_track_details(parent_prim_path):
             name = child.GetName()
             if name == "Rollers":
                 print(f"conveyor_prim path - {child.GetPath().pathString}")
-                tracks[prim.GetPath().pathString] = {"type": TrackType.NORMAL, "rigid_prim": child}
+                tracks[prim.GetPath().pathString] = {"type": TrackType.NORMAL,
+                                                    "track_prim": TrackInfo(child)}
             if name == "Sorter":
                 conveyor_prim = child.GetChild("Sorter_physics")
                 if conveyor_prim.IsValid():
                     print(f"conveyor_prim path - {conveyor_prim.GetPath().pathString}")
-                    tracks[prim.GetPath().pathString] = {"type": TrackType.CROSS, "rigid_prim": conveyor_prim}
+                    tracks[prim.GetPath().pathString] = {"type": TrackType.CROSS,
+                                                         "track_prim": TrackInfo(conveyor_prim)}
 
     return merge_config_with_tracks(tracks)

@@ -1,31 +1,9 @@
 {
-	"tracks": [
-		{
-			"name": "track_01",
-			"prim_path": "/World/Conveyors/track_01",
-			"direction": [
-				1,
-				0,
-				0
-			]
-		},
-		{
-			"name": "track_02",
-			"prim_path": "/World/Conveyors/track_02",
-			"direction": [
-				0,
-				1,
-				0
-			]
-		},
-		{
-			"name": "track_03",
-			"prim_path": "/World/Conveyors/track_03",
-			"direction": [
-				-1,
-				0,
-				0
-			]
-		}
-	]
+	"track_01": {
+		"directions": [
+			1,
+			-1,
+			0
+		]
+	},
 }

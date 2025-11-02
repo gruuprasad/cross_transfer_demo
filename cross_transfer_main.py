@@ -15,6 +15,7 @@ from conveyor_setup import read_track_details, TrackType
 from track_operator_task import TrackOperatorTask
 from box_supplier_task import BoxSupplierTask
 from physics_actions import set_surface_velocity
+from math_utils import hadamard_product
 
 current_dir = Path(__file__).parent
 asset_root_path = str(current_dir / "assets")
@@ -33,17 +34,18 @@ supplier_task = BoxSupplierTask()
 world.add_task(supplier_task)
 
 # create track operators and also set initial velocity for each tracj
-initial_velocity = np.array([0.5, 0.0, 0.0])
+initial_velocity = [0.5, 0.0, 0.0]
 track_operator_names = []
 for index, (track_path, properties) in enumerate(tracks.items()):
     # task that manages movement of box at a junction
     if properties["type"] == TrackType.CROSS:
-        task_name = f"track_operaotr_task_{index}" 
+        task_name = f"track_operator_task_{index}" 
         track_operator_task = TrackOperatorTask(properties["rigid_prim"], name=task_name)
         world.add_task(track_operator_task)
         track_operator_names.append(task_name)
-    set_surface_velocity(properties["rigid_prim"], initial_velocity * )
-
+    
+    direction = properties["track_info"].direction # desired direction in which conveyor to be moved during operation
+    set_surface_velocity(properties["track_info"].prim, hadamard_product(initial_velocity, direction))
 
 world.reset()
 world.play()
@@ -57,7 +59,7 @@ initialized = False
 while simulation_app.is_running():
     if not initialized:
         world.step(render=True)
-        initiallized = True
+        initialized = True
 
     switch_event = supplier_task.get_observations()["box_spawned"] % switch_frequency == 0
     if switch_event and not prev_switch_event:
