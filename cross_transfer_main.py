@@ -51,12 +51,18 @@ world.play()
 
 step_count = 0
 switch_frequency = 3 # switches every (4-1) boxes
-switch_event = False
+
+prev_switch_event = True # ignore switch event at time 0
+initialized = False
 
 while simulation_app.is_running():
+    if not initialized:
+        world.step(render=True)
+        initiallized = True
 
-    switch_event = supplier_task.get_observations()["box_crossed"] % switch_frequency == 0
-    if switch_event:
+    switch_event = supplier_task.get_observations()["box_spawned"] % switch_frequency == 0
+    if switch_event and not prev_switch_event:
+        # perform this only on rising edge
         for name in track_operator_names:
             if (task := world.get_task(name)) is not None:
                 switch = task.toggle_cross_switch()
@@ -64,6 +70,7 @@ while simulation_app.is_running():
                     print("belt is doing cross transfer for each item")
                 else:
                     print("belt is doing straight transfer for each item")
+    prev_switch_event = switch_event
 
     # advance the  world
     world.step(render=True)

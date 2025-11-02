@@ -21,6 +21,7 @@ class TrackOperatorTask(BaseTask):
         self._cross_prim = cross_prim
         self._track_state = TrackState.STRAIGHT
         self._cross_switch = False
+        self._item_present = False
 
     def set_up_scene(self, scene):
         super().set_up_scene(scene)
@@ -30,29 +31,30 @@ class TrackOperatorTask(BaseTask):
     def get_observations(self):
         observations = {
             "track_state": self._track_state,
-            "item_present": self._contact_sensor.get_current_frame()["in_contact"]    
+            "item_present": self._contact_sensor.get_current_frame()["in_contact"]
         }
-
         return observations
 
     def toggle_cross_switch(self):
-        if self._cross_switch == True:
-            self._cross_switch = False
-        else:
-            self._cross_switch = True
+        self._cross_switch = not self._cross_switch
+        print(f"toggle_cross_switch-{self._cross_switch}")
         return self._cross_switch
 
     def pre_step(self, step_index, simulation_time):
-        in_contact = self._contact_sensor.get_current_frame()["in_contact"]
-        if in_contact and self._track_state == TrackState.CROSS:
+        self._item_present = self._contact_sensor.get_current_frame()["in_contact"]
+
+        if self._item_present and self._track_state == TrackState.CROSS:
             # wait for item to complete transfer
+            print("[track_operator]: doing cross_transfer.")
             return
 
-        if in_contact and self._cross_switch:
-            # set conveyor to move cross.
+        if self._item_present and self._cross_switch:
+            # set conveyor to move across.
             set_surface_velocity_direction(self._cross_prim, [0, 1, 0])
+            print("[track_operator]:called set_surface_velocity_direction:cross")
             self._track_state = TrackState.CROSS
-        elif not in_contact and self._track_state == TrackState.CROSS:
+        elif not self._item_present and self._track_state == TrackState.CROSS:
             # set conveyor to move stright.
-            set_surface_velocity_direction(self._cross_prim, [1, 0, 0])
+            set_surface_velocity_direction(self._cross_prim, [-1, 0, 0])
+            print("[track_operator]:called set_surface_velocity_direction:straight")
             self._track_state = TrackState.STRAIGHT
