@@ -41,7 +41,7 @@ for index, (track_path, properties) in enumerate(tracks.items()):
     if properties["type"] == TrackType.CROSS:
         print("found cross track type")
         task_name = f"track_operator_task_{index}" 
-        track_operator_task = TrackOperatorTask(properties["info"].prim, name=task_name)
+        track_operator_task = TrackOperatorTask(properties["info"], name=task_name)
         world.add_task(track_operator_task)
         track_operator_names.append(task_name)
     

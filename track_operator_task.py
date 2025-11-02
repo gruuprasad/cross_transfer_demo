@@ -26,7 +26,7 @@ class TrackOperatorTask(BaseTask):
 
     def set_up_scene(self, scene):
         super().set_up_scene(scene)
-        self._contact_sensor_prim_path = "/World/sensor_base_01/contact_sensor"
+        self._contact_sensor_prim_path = "/World/sensor_base_01/Contact_Sensor"
         self._contact_sensor = setup_contact_sensor(self._contact_sensor_prim_path)
 
     def get_observations(self):
@@ -43,11 +43,9 @@ class TrackOperatorTask(BaseTask):
 
     def pre_step(self, step_index, simulation_time):
         self._item_present = self._contact_sensor.get_current_frame()["in_contact"]
-        print(f"sensor in_contact={self._item_present}")
 
         if self._item_present and self._track_state == TrackState.CROSS:
             # wait for item to complete transfer
-            print("[track_operator]: doing cross_transfer.")
             return
 
         if self._item_present and self._cross_switch:
