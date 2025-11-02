@@ -12,6 +12,9 @@ class TrackSupervisorTask(BaseTask):
         self._tracks = tracks
         self._track_tasks = []
         self._initial_velocity = [0.5, 0.0, 0.0]
+        self._last_switch_time = 0.0      # time (in seconds)
+        self._track_switch_interval = 5.0    # every 10 seconds
+
         # create task that handles cross-transfers
         for index, (track_path, properties) in enumerate(self._tracks.items()):
             if properties["type"] == TrackType.CROSS:
@@ -30,12 +33,18 @@ class TrackSupervisorTask(BaseTask):
             # desired direction in which conveyor to be moved
             # during operation, by default its positive coodrinates.
             # it can be set in the config.json.
-            for data in self._tracks.values():
-                direction = data["info"].direction
-                set_surface_velocity(data["info"].prim,
+            for track_data in self._tracks.values():
+                direction = track_data["info"].direction
+                set_surface_velocity(track_data["info"].prim,
                                  hadamard_product(self._initial_velocity, direction))
+                print(direction)
             self._initialised = True
+            return
 
-        # do any pre-step needed by supervisor
+        if simulation_time - self._last_switch_time >= self._track_switch_interval:
+            for task in self._track_tasks:
+                task.toggle_cross_switch()
+                self._last_switch_time = simulation_time
+
         for task in self._track_tasks:
             task.pre_step(step_index, simulation_time)

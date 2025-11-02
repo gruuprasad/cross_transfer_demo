@@ -33,8 +33,8 @@ class TrackOperatorTask(BaseTask):
         }
         return observations
 
-    def set_cross_switch(self, state):
-        self._cross_switch = state
+    def toggle_cross_switch(self):
+        self._cross_switch = not self._cross_switch
         return self._cross_switch
 
     def pre_step(self, step_index, simulation_time):

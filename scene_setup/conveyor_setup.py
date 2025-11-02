@@ -4,9 +4,11 @@ import carb
 import json
 from pathlib import Path
 
+from common.types import TrackInfo, TrackType
+
 def merge_config_with_tracks(tracks, config_file="config.json"):
     print(f"exisitng track details: {tracks}")
-    config_path = Path(__file__).resolve().parent / "config" / config_file
+    config_path = Path(__file__).resolve().parent.parent / "config" / config_file
 
     # Load config (can be missing or empty)
     if not config_path.exists():
