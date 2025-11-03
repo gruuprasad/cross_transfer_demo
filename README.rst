@@ -35,7 +35,6 @@ The scene is configured with the following components:
 
 - **Conveyor Belts**: Created using the ``conveyor_belt_utility`` extension. Conveyor belt prims are equipped with action graphs to control surface velocity of rollers/belts
 - **Contact Sensor**: Positioned at the center of the cross-conveyor belt to detect when boxes are present during cross-transfer operations
-- **Lighting**: Multiple light sources (SphereLight, DistantLight, RectLight, DiskLight) are configured for proper scene illumination
 - **Asset References**: Conveyor room geometry is loaded from USD assets in the ``assets/`` directory
 
 Configuration Variables
@@ -73,19 +72,6 @@ Example configuration:
        }
    }
 
-Architecture Flow
------------------
-
-1. **Initialization**: Main script loads conveyor room USD, detects tracks, and sets up lighting
-2. **Task Setup**: BoxSupplierTask, TrackSupervisorTask, and TrackOperatorTask instances are created and added to the world
-3. **Simulation Loop**:
-   - BoxSupplierTask checks spacing and spawns boxes as needed
-   - TrackSupervisorTask monitors time and triggers periodic cross-switches
-   - TrackOperatorTask reads contact sensors and manages track direction based on:
-     * Presence/absence of boxes (via contact sensor)
-     * Cross-switch toggle state (from supervisor)
-     * Current track state (prevents mid-transfer switches)
-4. **Dynamic Control**: Conveyor velocities are updated in real-time using PhysX Surface Velocity API
 
 Next Steps
 ----------
