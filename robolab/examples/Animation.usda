@@ -1,0 +1,17 @@
+#usda 1.0
+(
+    endTimeCode = 48
+    startTimeCode = 1
+    timeCodesPerSecond = 24
+)
+
+def Xform "Robot"
+{
+    double3 xformOp:translate:translate.timeSamples = {
+        1: (0, 0, 0),
+        24: (5, 0, 0),
+        48: (0, 0, 0),
+    }
+    uniform token[] xformOpOrder = ["xformOp:translate:translate"]
+}
+

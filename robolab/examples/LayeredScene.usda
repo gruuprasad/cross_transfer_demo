@@ -1,0 +1,9 @@
+#usda 1.0
+(
+    subLayers = [
+        @/home/gp/roboticLab/wipro/omniworld/robolab/examples/Base.usda@,
+        @/home/gp/roboticLab/wipro/omniworld/robolab/examples/Animation.usda@,
+        @/home/gp/roboticLab/wipro/omniworld/robolab/examples/Override.usda@
+    ]
+)
+
