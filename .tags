@@ -1,0 +1,76 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/gp/roboticLab/wipro/omniworld/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+/World/ConveyorTrack_AB_01	conveyor_room/config/config.json	/^		"\/World\/ConveyorTrack_AB_01": {$/;"	o	object:track_operator_task
+0	conveyor_room/config/config.json	/^				-1,$/;"	n	array:track_operator_task./World/ConveyorTrack_AB_01.direction
+1	conveyor_room/config/config.json	/^				1,$/;"	n	array:track_operator_task./World/ConveyorTrack_AB_01.direction
+2	conveyor_room/config/config.json	/^				0$/;"	n	array:track_operator_task./World/ConveyorTrack_AB_01.direction
+A procedural robotics lab powered by USD.	robolab/README.rst	/^A procedural robotics lab powered by USD.$/;"	c
+Architecture Flow	conveyor_room/README.rst	/^Architecture Flow$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+BoxSupplierTask	conveyor_room/tasks/box_supplier_task.py	/^class BoxSupplierTask(BaseTask):$/;"	c
+CROSS	conveyor_room/common/types.py	/^    CROSS = 1$/;"	v	class:TrackState
+CROSS	conveyor_room/common/types.py	/^    CROSS = 1$/;"	v	class:TrackType
+Configuration Variables	conveyor_room/README.rst	/^Configuration Variables$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+ContactSensor	conveyor_room/scene_setup/sensors.py	/^class ContactSensor:$/;"	c
+Cross-Transfer Conveyor Belt Simulation	conveyor_room/README.rst	/^Cross-Transfer Conveyor Belt Simulation$/;"	c
+NORMAL	conveyor_room/common/types.py	/^    NORMAL = 0$/;"	v	class:TrackType
+Next Steps	conveyor_room/README.rst	/^Next Steps$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+Overview	conveyor_room/README.rst	/^Overview$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+Running the Demo	conveyor_room/README.rst	/^Running the Demo$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+STRAIGHT	conveyor_room/common/types.py	/^    STRAIGHT = 0$/;"	v	class:TrackState
+Scene Setup	conveyor_room/README.rst	/^Scene Setup$/;"	s	chapter:Cross-Transfer Conveyor Belt Simulation
+TrackInfo	conveyor_room/common/types.py	/^class TrackInfo:$/;"	c
+TrackOperatorTask	conveyor_room/tasks/track_operator_task.py	/^class TrackOperatorTask(BaseTask):$/;"	c
+TrackState	conveyor_room/common/types.py	/^class TrackState(Enum):$/;"	c
+TrackSupervisorTask	conveyor_room/tasks/track_supervisor_task.py	/^class TrackSupervisorTask(BaseTask):$/;"	c
+TrackType	conveyor_room/common/types.py	/^class TrackType(Enum):$/;"	c
+__init__	conveyor_room/common/types.py	/^    def __init__(self, prim, direction=[1, 1, 0,]):$/;"	m	class:TrackInfo
+__init__	conveyor_room/scene_setup/sensors.py	/^    def __init__(self, sensor_path):$/;"	m	class:ContactSensor
+__init__	conveyor_room/tasks/box_supplier_task.py	/^    def __init__(self, name="box_supplier_task", box_gap=0.8):  $/;"	m	class:BoxSupplierTask
+__init__	conveyor_room/tasks/track_operator_task.py	/^    def __init__(self, track_info, name="track_operator_task"):  $/;"	m	class:TrackOperatorTask
+__init__	conveyor_room/tasks/track_supervisor_task.py	/^    def __init__(self, tracks, name="track_supervisor_task"):$/;"	m	class:TrackSupervisorTask
+__repr__	conveyor_room/common/types.py	/^    def __repr__(self):$/;"	m	class:TrackInfo
+_update_debounced_contact	conveyor_room/tasks/track_operator_task.py	/^    def _update_debounced_contact(self):$/;"	m	class:TrackOperatorTask
+asset_root_path	conveyor_room/main.py	/^asset_root_path = str(current_dir \/ "assets")$/;"	v
+box_gap	conveyor_room/config/config.json	/^		"box_gap": 0.7$/;"	n	object:box_supplier_task
+box_supplier_task	conveyor_room/config/config.json	/^	"box_supplier_task": {$/;"	o
+current_dir	conveyor_room/main.py	/^current_dir = Path(__file__).parent$/;"	v
+direction	conveyor_room/config/config.json	/^			"direction": [$/;"	a	object:track_operator_task./World/ConveyorTrack_AB_01
+get_current_frame	conveyor_room/scene_setup/sensors.py	/^    def get_current_frame(self):$/;"	m	class:ContactSensor
+get_observations	conveyor_room/tasks/box_supplier_task.py	/^    def get_observations(self):$/;"	m	class:BoxSupplierTask
+get_observations	conveyor_room/tasks/track_operator_task.py	/^    def get_observations(self):$/;"	m	class:TrackOperatorTask
+hadamard_product	conveyor_room/common/math_utils.py	/^def hadamard_product(list_a, list_b):$/;"	f
+lights	conveyor_room/scene_setup/lightings.py	/^lights = [$/;"	v
+merge_config_with_tracks	conveyor_room/scene_setup/conveyor_setup.py	/^def merge_config_with_tracks(tracks, config_file="config.json"):$/;"	f
+np	conveyor_room/tasks/box_supplier_task.py	/^import numpy as np$/;"	I	nameref:module:numpy
+pre_step	conveyor_room/tasks/box_supplier_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:BoxSupplierTask
+pre_step	conveyor_room/tasks/track_operator_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:TrackOperatorTask
+pre_step	conveyor_room/tasks/track_supervisor_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:TrackSupervisorTask
+read_track_details	conveyor_room/scene_setup/conveyor_setup.py	/^def read_track_details(parent_prim_path):$/;"	f
+set_machine_state	conveyor_room/tasks/box_supplier_task.py	/^    def set_machine_state(state):$/;"	m	class:BoxSupplierTask
+set_surface_velocity	conveyor_room/physics/surface_velocity.py	/^def set_surface_velocity(conveyor_prim, vel, axis=0):$/;"	f
+set_surface_velocity_direction	conveyor_room/physics/surface_velocity.py	/^def set_surface_velocity_direction(conveyor_prim, direction):$/;"	f
+set_up_scene	conveyor_room/tasks/box_supplier_task.py	/^    def set_up_scene(self, scene):$/;"	m	class:BoxSupplierTask
+set_up_scene	conveyor_room/tasks/track_operator_task.py	/^    def set_up_scene(self, scene):$/;"	m	class:TrackOperatorTask
+set_up_scene	conveyor_room/tasks/track_supervisor_task.py	/^    def set_up_scene(self, scene):$/;"	m	class:TrackSupervisorTask
+setup_contact_sensor	conveyor_room/scene_setup/sensors.py	/^def setup_contact_sensor(sensor_prim_path):$/;"	f
+setup_lighting	conveyor_room/scene_setup/lightings.py	/^def setup_lighting():$/;"	f
+simulation_app	conveyor_room/main.py	/^simulation_app = SimulationApp({"headless": False})$/;"	v
+spawn_box	conveyor_room/tasks/box_supplier_task.py	/^    def spawn_box(self):$/;"	m	class:BoxSupplierTask
+supervisor_task	conveyor_room/main.py	/^supervisor_task = TrackSupervisorTask(tracks)$/;"	v
+supplier_task	conveyor_room/main.py	/^supplier_task = BoxSupplierTask()$/;"	v
+switch_interval	conveyor_room/config/config.json	/^		"switch_interval": 5.0$/;"	n	object:track_supervisor_task
+toggle_cross_switch	conveyor_room/tasks/track_operator_task.py	/^    def toggle_cross_switch(self):$/;"	m	class:TrackOperatorTask
+track_asset	conveyor_room/main.py	/^track_asset = str(Path(asset_root_path) \/ "conveyor_room.usd")$/;"	v
+track_operator_task	conveyor_room/config/config.json	/^	"track_operator_task": {$/;"	o
+track_supervisor_task	conveyor_room/config/config.json	/^	"track_supervisor_task": {$/;"	o
+tracks	conveyor_room/main.py	/^tracks = read_track_details("\/World")$/;"	v
+world	conveyor_room/main.py	/^world = World(stage_units_in_meters=1.0)$/;"	v
