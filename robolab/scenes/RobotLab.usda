@@ -1,0 +1,172 @@
+#usda 1.0
+(
+    "Stage 1 - Robot Lab basic environment"
+    endTimeCode = 48
+    metersPerUnit = 1
+    startTimeCode = 1
+    upAxis = "Y"
+)
+
+def Xform "Lab"
+{
+    custom token lab:powerStatus = "online"
+    custom float lab:temperature = 22.5
+
+    def Cube "Floor"
+    {
+        float3 xformOp:scale = (10, 1, 10)
+        double3 xformOp:translate = (0, -0.5, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+
+    def Xform "Robot_Station_1"
+    {
+        double3 xformOp:translate = (-4, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cylinder "Marker"
+        {
+            float3 xformOp:scale = (0.5, 0.1, 0.5)
+            double3 xformOp:translate = (0, 0.10000000149011612, 0)
+            uniform token[] xformOpOrder = ["xformOp:scale", "xformOp:translate"]
+        }
+
+        def Xform "RobotInstance" (
+            prepend references = @/home/gp/roboticLab/wipro/omniworld/robolab/assets/robots/Robot.usda@
+            variants = {
+                string State = "Idle"
+            }
+            prepend variantSets = "State"
+        )
+        {
+            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-4, 0, 0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+
+            over "Arm"
+            {
+                matrix4d xformOp:transform.timeSamples = {
+                    1: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) ),
+                    24: ( (1, 0, 0, 0), (0, 2.220446049250313e-16, 1, 0), (0, -1, 2.220446049250313e-16, 0), (0, 0, 0, 1) ),
+                    48: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) ),
+                }
+            }
+
+            over "Gripper"
+            {
+                over "LeftFinger"
+                {
+                    matrix4d xformOp:transform.timeSamples = {
+                        1: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.15, 0, 0, 1) ),
+                        12: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, 0, 0, 1) ),
+                        24: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.15, 0, 0, 1) ),
+                        36: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, 0, 0, 1) ),
+                        48: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.15, 0, 0, 1) ),
+                    }
+                }
+
+                over "RightFinger"
+                {
+                    matrix4d xformOp:transform.timeSamples = {
+                        1: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.15, 0, 0, 1) ),
+                        12: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, 0, 0, 1) ),
+                        24: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.15, 0, 0, 1) ),
+                        36: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, 0, 0, 1) ),
+                        48: ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.15, 0, 0, 1) ),
+                    }
+                }
+            }
+            variantSet "State" = {
+                "Active" {
+                    over "Arm"
+                    {
+                        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 0.25881904510252074, 0.9659258262890683, 0), (0, -0.9659258262890683, 0.25881904510252074, 0), (0, 0, 0, 1) )
+                    }
+
+                    over "Gripper"
+                    {
+                        over "LeftFinger"
+                        {
+                            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.1, 0, 0, 1) )
+                        }
+
+                        over "RightFinger"
+                        {
+                            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.1, 0, 0, 1) )
+                        }
+                    }
+
+                }
+                "Idle" {
+                    over "Arm"
+                    {
+                        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+                    }
+
+                    over "Gripper"
+                    {
+                        over "LeftFinger"
+                        {
+                            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.2, 0, 0, 1) )
+                        }
+
+                        over "RightFinger"
+                        {
+                            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.2, 0, 0, 1) )
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    def Xform "Robot_Station_2"
+    {
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cylinder "Marker"
+        {
+            float3 xformOp:scale = (0.5, 0.1, 0.5)
+            double3 xformOp:translate = (0, 0.10000000149011612, 0)
+            uniform token[] xformOpOrder = ["xformOp:scale", "xformOp:translate"]
+        }
+
+        def Xform "RobotInstance" (
+            prepend references = @/home/gp/roboticLab/wipro/omniworld/robolab/assets/robots/Robot.usda@
+        )
+        {
+            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+    }
+
+    def Xform "Robot_Station_3"
+    {
+        double3 xformOp:translate = (4, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cylinder "Marker"
+        {
+            float3 xformOp:scale = (0.5, 0.1, 0.5)
+            double3 xformOp:translate = (0, 0.10000000149011612, 0)
+            uniform token[] xformOpOrder = ["xformOp:scale", "xformOp:translate"]
+        }
+
+        def Xform "RobotInstance" (
+            prepend references = @/home/gp/roboticLab/wipro/omniworld/robolab/assets/robots/Robot.usda@
+        )
+        {
+            matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (4, 0, 0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+    }
+
+    def Sphere "LightProxy"
+    {
+        float3 xformOp:scale = (0.2, 0.2, 0.2)
+        double3 xformOp:translate = (0, 5, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+}
+

@@ -1,0 +1,56 @@
+#usda 1.0
+(
+    "Stage 2 - Modular Robot Asset"
+    defaultPrim = "Robot"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "Robot"
+{
+    custom string robot:serialNumber = "RBT-001"
+    custom token robot:status = "idle"
+
+    def Xform "Base"
+    {
+        matrix4d xformOp:transform = ( (1.5, 0, 0, 0), (0, 0.5, 0, 0), (0, 0, 1.5, 0), (0, 0.25, 0, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Cylinder "Body"
+        {
+            double height = 0.5
+            double radius = 0.8
+        }
+    }
+
+    def Xform "Arm"
+    {
+        matrix4d xformOp:transform = ( (0.3, 0, 0, 0), (0, 2, 0, 0), (0, 0, 0.3, 0), (0, 0.75, 0, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Cylinder "Body"
+        {
+            double height = 1
+            double radius = 0.15
+        }
+    }
+
+    def Xform "Gripper"
+    {
+        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 1.75, 0, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Cube "LeftFinger"
+        {
+            matrix4d xformOp:transform = ( (0.1, 0, 0, 0), (0, 0.3, 0, 0), (0, 0, 0.1, 0), (-0.15, 0, 0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+
+        def Cube "RightFinger"
+        {
+            matrix4d xformOp:transform = ( (0.1, 0, 0, 0), (0, 0.3, 0, 0), (0, 0, 0.1, 0), (0.15, 0, 0, 1) )
+            uniform token[] xformOpOrder = ["xformOp:transform"]
+        }
+    }
+}
+

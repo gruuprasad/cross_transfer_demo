@@ -39,18 +39,34 @@ __init__	conveyor_room/tasks/track_operator_task.py	/^    def __init__(self, tra
 __init__	conveyor_room/tasks/track_supervisor_task.py	/^    def __init__(self, tracks, name="track_supervisor_task"):$/;"	m	class:TrackSupervisorTask
 __repr__	conveyor_room/common/types.py	/^    def __repr__(self):$/;"	m	class:TrackInfo
 _update_debounced_contact	conveyor_room/tasks/track_operator_task.py	/^    def _update_debounced_contact(self):$/;"	m	class:TrackOperatorTask
+animate_gripper	robolab/scripts/stage5_robot_gripper_animation.py	/^def animate_gripper(stage, robot_index=1):$/;"	f
+animate_robot_arm	robolab/scripts/stage4_robot_animation.py	/^def animate_robot_arm():$/;"	f
 asset_root_path	conveyor_room/main.py	/^asset_root_path = str(current_dir \/ "assets")$/;"	v
 box_gap	conveyor_room/config/config.json	/^		"box_gap": 0.7$/;"	n	object:box_supplier_task
 box_supplier_task	conveyor_room/config/config.json	/^	"box_supplier_task": {$/;"	o
+build_robot_asset	robolab/scripts/stage2_build_robot_modren.py	/^def build_robot_asset():$/;"	f
+create_robot_variants	robolab/scripts/stage6_robot_variants.py	/^def create_robot_variants(stage, robot_index=1):$/;"	f
 current_dir	conveyor_room/main.py	/^current_dir = Path(__file__).parent$/;"	v
 direction	conveyor_room/config/config.json	/^			"direction": [$/;"	a	object:track_operator_task./World/ConveyorTrack_AB_01
+ensure_folder_structure	robolab/scripts/utils/scene_utils.py	/^def ensure_folder_structure():$/;"	f
+floor	robolab/scripts/stage1_robot_lab_setup.py	/^floor = UsdGeom.Cube.Define(stage, "\/Lab\/Floor")$/;"	v
 get_current_frame	conveyor_room/scene_setup/sensors.py	/^    def get_current_frame(self):$/;"	m	class:ContactSensor
 get_observations	conveyor_room/tasks/box_supplier_task.py	/^    def get_observations(self):$/;"	m	class:BoxSupplierTask
 get_observations	conveyor_room/tasks/track_operator_task.py	/^    def get_observations(self):$/;"	m	class:TrackOperatorTask
+get_project_root	robolab/scripts/utils/scene_utils.py	/^def get_project_root() -> Path:$/;"	f	typeref:typename:Path
+get_usd_path	robolab/scripts/utils/scene_utils.py	/^def get_usd_path(category: str, name: str) -> str:$/;"	f	typeref:typename:str
 hadamard_product	conveyor_room/common/math_utils.py	/^def hadamard_product(list_a, list_b):$/;"	f
+lab	robolab/scripts/stage1_robot_lab_setup.py	/^lab = UsdGeom.Xform.Define(stage, "\/Lab")$/;"	v
+lab_prim	robolab/scripts/stage1_robot_lab_setup.py	/^lab_prim = lab.GetPrim()$/;"	v
+light	robolab/scripts/stage1_robot_lab_setup.py	/^light = UsdGeom.Sphere.Define(stage, "\/Lab\/LightProxy")$/;"	v
 lights	conveyor_room/scene_setup/lightings.py	/^lights = [$/;"	v
+main	robolab/scripts/stage5_robot_gripper_animation.py	/^def main():$/;"	f
+main	robolab/scripts/stage6_robot_variants.py	/^def main():$/;"	f
+marker	robolab/scripts/stage1_robot_lab_setup.py	/^    marker = UsdGeom.Cylinder.Define(stage, station_path + "\/Marker")$/;"	v
 merge_config_with_tracks	conveyor_room/scene_setup/conveyor_setup.py	/^def merge_config_with_tracks(tracks, config_file="config.json"):$/;"	f
 np	conveyor_room/tasks/box_supplier_task.py	/^import numpy as np$/;"	I	nameref:module:numpy
+num_stations	robolab/scripts/stage1_robot_lab_setup.py	/^num_stations = 3$/;"	v
+populate_lab_with_robots	robolab/scripts/stage3_lab_with_robots_modern.py	/^def populate_lab_with_robots():$/;"	f
 pre_step	conveyor_room/tasks/box_supplier_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:BoxSupplierTask
 pre_step	conveyor_room/tasks/track_operator_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:TrackOperatorTask
 pre_step	conveyor_room/tasks/track_supervisor_task.py	/^    def pre_step(self, step_index, simulation_time):$/;"	m	class:TrackSupervisorTask
@@ -64,7 +80,12 @@ set_up_scene	conveyor_room/tasks/track_supervisor_task.py	/^    def set_up_scene
 setup_contact_sensor	conveyor_room/scene_setup/sensors.py	/^def setup_contact_sensor(sensor_prim_path):$/;"	f
 setup_lighting	conveyor_room/scene_setup/lightings.py	/^def setup_lighting():$/;"	f
 simulation_app	conveyor_room/main.py	/^simulation_app = SimulationApp({"headless": False})$/;"	v
+spacing	robolab/scripts/stage1_robot_lab_setup.py	/^spacing = 4.0$/;"	v
 spawn_box	conveyor_room/tasks/box_supplier_task.py	/^    def spawn_box(self):$/;"	m	class:BoxSupplierTask
+stage	robolab/scripts/stage1_robot_lab_setup.py	/^stage = Usd.Stage.CreateNew(stage_path)$/;"	v
+stage_path	robolab/scripts/stage1_robot_lab_setup.py	/^stage_path = get_usd_path("scenes", "RobotLab.usda")$/;"	v
+station	robolab/scripts/stage1_robot_lab_setup.py	/^    station = UsdGeom.Xform.Define(stage, station_path)$/;"	v
+station_path	robolab/scripts/stage1_robot_lab_setup.py	/^    station_path = f"\/Lab\/Robot_Station_{i+1}"$/;"	v
 supervisor_task	conveyor_room/main.py	/^supervisor_task = TrackSupervisorTask(tracks)$/;"	v
 supplier_task	conveyor_room/main.py	/^supplier_task = BoxSupplierTask()$/;"	v
 switch_interval	conveyor_room/config/config.json	/^		"switch_interval": 5.0$/;"	n	object:track_supervisor_task
